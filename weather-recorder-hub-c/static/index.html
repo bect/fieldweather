@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Recorder Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Weather Recorder Hub</h1>
+            <p>Your local synchronization dashboard and forecasting tool.</p>
+        </header>
+        
+        <main>
+            <section class="card forecast-card">
+                <h2>Statistical Forecast</h2>
+                <div id="forecast-content">
+                    <p>Loading forecast data...</p>
+                </div>
+            </section>
+
+            <section class="card records-card">
+                <h2>Synced Weather Records</h2>
+                <div class="table-container">
+                    <table id="records-table">
+                        <thead>
+                            <tr>
+                                <th>Local ID</th>
+                                <th>Timestamp</th>
+                                <th>Location</th>
+                                <th>Condition</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-body">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

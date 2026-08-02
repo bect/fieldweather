@@ -47,3 +47,13 @@ obj/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# C Hub Server
+weather-recorder-hub-c/hub-local
+weather-recorder-hub-c/hub-orangepi
+weather-recorder-hub-c/**/*.o
+weather-recorder-hub-c/*.db
+weather-recorder-hub-c/*.db-journal
+weather-recorder-hub-c/*.sqlite
+weather-recorder-hub-c/*.sqlite3
+weather-recorder-hub-c/weather.db
