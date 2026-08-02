@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FieldWeather SPA</title>
+    <style>
+        :root {
+            --field-black: #111111;
+            --field-white: #F4F4F4;
+            --field-yellow: #FFD600;
+            --field-blue: #2196F3;
+            --field-grey: #9E9E9E;
+            --field-orange: #FF8F00;
+            --field-green: #4CAF50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            /* Prevent body scroll */
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+        }
+
+        .phone-frame {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            background-color: var(--field-white);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border-left: 2px solid #000;
+            border-right: 2px solid #000;
+        }
+
+        /* --- Top Navigation --- */
+        .nav-bar {
+            display: flex;
+            background-color: var(--field-black);
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            flex-grow: 1;
+            padding: 16px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #666;
+            background-color: var(--field-black);
+            border: none;
+            border-bottom: 4px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn.active {
+            color: var(--field-yellow);
+            border-bottom: 4px solid var(--field-yellow);
+        }
+
+        .location-header {
+            background-color: var(--field-black);
+            color: var(--field-white);
+            padding: 8px 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 4px solid var(--field-yellow);
+            flex-shrink: 0;
+        }
+
+        /* --- View Containers --- */
+        .view-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* Input view enforces no scroll */
+        }
+
+        .view {
+            display: none;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        /* --- INPUT VIEW STYLES --- */
+        .input-top-section {
+            padding: 16px 20px 0 20px;
+            flex-shrink: 0;
+        }
+
+        .section-header {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--field-black);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .time-chips {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .time-chip {
+            background-color: var(--field-white);
+            border: 3px solid var(--field-black);
+            padding: 12px 4px;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--field-black);
+            cursor: pointer;
+            transition: transform 0.1s;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .time-chip:active {
+            transform: translate(2px, 2px);
+            background-color: var(--field-yellow);
+        }
+
+        .time-chip.reset-btn {
+            background-color: var(--field-yellow);
+        }
+
+        .time-preview {
+            background-color: var(--field-black);
+            color: var(--field-white);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 3px solid var(--field-black);
+            margin-bottom: 16px;
+        }
+
+        .preview-label {
+            font-size: 12px;
+            color: #CCC;
+            text-transform: uppercase;
+        }
+
+        .preview-time-block {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .preview-time {
+            font-weight: 800;
+            color: var(--field-yellow);
+            font-size: 22px;
+        }
+
+        .preview-subtext {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--field-white);
+        }
+
+        .input-bottom-section {
+            flex-grow: 1;
+            padding: 0 20px 16px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .weather-card {
+            background-color: var(--field-white);
+            border: 3px solid var(--field-black);
+            padding: 16px 8px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .weather-card:active {
+            transform: translate(2px, 2px);
+        }
+
+        .weather-card.selected {
+            background-color: var(--field-black);
+        }
+
+        .weather-card.selected .weather-label {
+            color: var(--field-yellow);
+        }
+
+        .weather-icon {
+            font-size: 36px;
+        }
+
+        .weather-label {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--field-black);
+            text-transform: uppercase;
+        }
+
+        .action-bar {
+            padding: 12px 20px 20px 20px;
+            background-color: var(--field-white);
+            border-top: 4px solid var(--field-black);
+            flex-shrink: 0;
+        }
+
+        .save-button {
+            width: 100%;
+            background-color: var(--field-yellow);
+            color: var(--field-black);
+            border: 3px solid var(--field-black);
+            padding: 18px;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.1s;
+            box-shadow: 4px 4px 0px var(--field-black);
+        }
+
+        .save-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px var(--field-black);
+        }
+
+        /* --- STATS VIEW STYLES --- */
+        #view-stats {
+            overflow-y: auto;
+            /* Allow scrolling for stats */
+            padding: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            border: 3px solid var(--field-black);
+            background: var(--field-white);
+            padding: 12px;
+            text-align: center;
+        }
+
+        .summary-num {
+            font-size: 36px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 4px;
+            color: #444;
+        }
+
+        .month-strip {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .day-block {
+            height: 24px;
+            border: 1px solid #000;
+        }
+
+        .bg-sunny {
+            background-color: var(--field-yellow);
+        }
+
+        .bg-rain {
+            background-color: var(--field-blue);
+        }
+
+        .bg-cloudy {
+            background-color: var(--field-grey);
+        }
+
+        .bg-none {
+            background-color: #E0E0E0;
+        }
+
+        .legend {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #000;
+        }
+
+        .timeline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 2px solid #000;
+        }
+
+        .timeline-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .timeline-icon {
+            font-size: 28px;
+        }
+
+        .timeline-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .timeline-day {
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .timeline-right {
+            text-align: right;
+        }
+
+        .timeline-time {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .timeline-location {
+            font-size: 12px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #000;
+        }
+
+        .status-pending {
+            background-color: var(--field-orange);
+        }
+
+        .status-synced {
+            background-color: var(--field-green);
+        }
+
+        .sync-btn {
+            width: 100%;
+            background-color: var(--field-white);
+            color: var(--field-black);
+            border: 3px solid var(--field-black);
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0px var(--field-black);
+            margin-bottom: 20px;
+        }
+
+        .sync-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px var(--field-black);
+        }
+
+        .sync-btn.syncing {
+            background-color: var(--field-black);
+            color: var(--field-yellow);
+            pointer-events: none;
+        }
+
+        /* --- Toast Notification --- */
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--field-black);
+            color: var(--field-yellow);
+            padding: 12px 24px;
+            border: 3px solid var(--field-yellow);
+            font-weight: 800;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 100;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="phone-frame">
+        <!-- Top Navigation -->
+        <div class="nav-bar">
+            <button class="nav-btn active" id="tab-input" onclick="switchView('input')">Log Weather</button>
+            <button class="nav-btn" id="tab-stats" onclick="switchView('stats')">Farm Stats</button>
+        </div>
+
+        <div class="location-header">
+            <span>FIELD WEATHER</span>
+            <span>📍 Kaliawi</span>
+        </div>
+
+        <div class="view-container">
+
+            <!-- ================= INPUT VIEW ================= -->
+            <div class="view active" id="view-input">
+                <div class="input-top-section">
+                    <div class="section-header">TIME OBSERVED</div>
+                    <div class="time-chips">
+                        <div class="time-chip reset-btn" onclick="resetTime()">↺ NOW</div>
+                        <div class="time-chip" onclick="addTime(5)">- 5m</div>
+                        <div class="time-chip" onclick="addTime(15)">- 15m</div>
+                        <div class="time-chip" onclick="addTime(30)">- 30m</div>
+                        <div class="time-chip" onclick="addTime(60)">- 1h</div>
+                    </div>
+                    <div class="time-preview">
+                        <span class="preview-label">Will Save As</span>
+                        <div class="preview-time-block">
+                            <span class="preview-time" id="previewTime">02:15 PM</span>
+                            <span class="preview-subtext" id="previewSubtext">(Now)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-bottom-section">
+                    <div class="section-header">CURRENT CONDITIONS</div>
+                    <div class="weather-grid">
+                        <div class="weather-card" onclick="selectWeather(this)">
+                            <span class="weather-icon">☀️</span>
+                            <span class="weather-label">Sunny</span>
+                        </div>
+                        <div class="weather-card" onclick="selectWeather(this)">
+                            <span class="weather-icon">☁️</span>
+                            <span class="weather-label">Cloudy</span>
+                        </div>
+                        <div class="weather-card selected" onclick="selectWeather(this)">
+                            <span class="weather-icon">🌧️</span>
+                            <span class="weather-label">Raining</span>
+                        </div>
+                        <div class="weather-card" onclick="selectWeather(this)">
+                            <span class="weather-icon">⛈️</span>
+                            <span class="weather-label">Stormy</span>
+                        </div>
+                        <div class="weather-card" onclick="selectWeather(this)">
+                            <span class="weather-icon">🌬️</span>
+                            <span class="weather-label">Windy</span>
+                        </div>
+                        <div class="weather-card" onclick="selectWeather(this)">
+                            <span class="weather-icon">🌫️</span>
+                            <span class="weather-label">Foggy</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <button class="save-button" onclick="saveRecord()">💾 SAVE RECORD</button>
+                </div>
+            </div>
+
+            <!-- ================= STATS VIEW ================= -->
+            <div class="view" id="view-stats">
+                <div class="section-header">OCTOBER SUMMARY</div>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-num" style="color: var(--field-blue);">4</div>
+                        <div class="summary-label">Rain Days</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-num" style="color: var(--field-orange);">12</div>
+                        <div class="summary-label">Sunny Days</div>
+                    </div>
+                </div>
+
+                <div class="section-header">LAST 30 DAYS</div>
+                <div class="month-strip">
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-cloudy"></div>
+                    <div class="day-block bg-rain"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-cloudy"></div>
+                    <div class="day-block bg-none"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-rain"></div>
+                    <div class="day-block bg-cloudy"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-none"></div>
+                    <div class="day-block bg-cloudy"></div>
+                    <div class="day-block bg-rain"></div>
+                    <div class="day-block bg-rain"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-cloudy"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-sunny"></div>
+                    <div class="day-block bg-none"></div>
+                    <div class="day-block bg-none"></div>
+                    <div class="day-block bg-sunny"></div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot bg-sunny"></div> Sun
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot bg-cloudy"></div> Cloud
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot bg-rain"></div> Rain
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot bg-none"></div> None
+                    </div>
+                </div>
+
+                <div class="section-header">RECENT LOGS</div>
+
+                <div class="timeline-item">
+                    <div class="timeline-left">
+                        <span class="timeline-icon">🌧️</span>
+                        <div class="timeline-info">
+                            <span class="timeline-day">Today</span>
+                            <span class="timeline-date">Oct 24, 2024</span>
+                        </div>
+                    </div>
+                    <div class="timeline-right">
+                        <div class="timeline-time">02:00 PM</div>
+                        <div class="timeline-location">📍 S. Pasture</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-left">
+                        <span class="timeline-icon">☀️</span>
+                        <div class="timeline-info">
+                            <span class="timeline-day">Yesterday</span>
+                            <span class="timeline-date">Oct 23, 2024</span>
+                        </div>
+                    </div>
+                    <div class="timeline-right">
+                        <div class="timeline-time">09:15 AM</div>
+                        <div class="timeline-location">📍 N. Field</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-left">
+                        <span class="timeline-icon">☁️</span>
+                        <div class="timeline-info">
+                            <span class="timeline-day">Oct 22</span>
+                            <span class="timeline-date">Oct 22, 2024</span>
+                        </div>
+                    </div>
+                    <div class="timeline-right">
+                        <div class="timeline-time">11:45 AM</div>
+                        <div class="timeline-location">📍 S. Pasture</div>
+                    </div>
+                </div>
+
+                <div class="sync-status">
+                    <div class="status-dot status-pending" id="statusDot"></div>
+                    <span id="statusText">3 Records Pending Sync</span>
+                </div>
+
+                <button class="sync-btn" id="syncBtn" onclick="syncData()">
+                    🔄 SYNC TO LOCAL HUB
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Floating Toast -->
+        <div class="toast" id="toast">✅ WEATHER LOGGED!</div>
+    </div>
+
+    <script>
+        // --- View Switching ---
+        function switchView(view) {
+            // Toggle Views
+            document.getElementById('view-input').classList.remove('active');
+            document.getElementById('view-stats').classList.remove('active');
+            document.getElementById('view-' + view).classList.add('active');
+
+            // Toggle Tabs
+            document.getElementById('tab-input').classList.remove('active');
+            document.getElementById('tab-stats').classList.remove('active');
+            document.getElementById('tab-' + view).classList.add('active');
+        }
+
+        // --- Input View Logic ---
+        let totalMinutesAgo = 0;
+
+        function formatTime(date) {
+            let hours = date.getHours();
+            let minutes = date.getMinutes();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            return hours + ':' + minutes + ' ' + ampm;
+        }
+
+        function formatDuration(mins) {
+            if (mins === 0) return "(Now)";
+            let h = Math.floor(mins / 60);
+            let m = mins % 60;
+            let str = "";
+            if (h > 0) str += h + "h ";
+            if (m > 0) str += m + "m ";
+            return "(" + str.trim() + " ago)";
+        }
+
+        function updatePreview() {
+            let now = new Date();
+            let previewDate = new Date(now.getTime() - (totalMinutesAgo * 60000));
+            document.getElementById('previewTime').innerText = formatTime(previewDate);
+            document.getElementById('previewSubtext').innerText = formatDuration(totalMinutesAgo);
+        }
+
+        function addTime(minutes) {
+            totalMinutesAgo += minutes;
+            updatePreview();
+        }
+
+        function resetTime() {
+            totalMinutesAgo = 0;
+            updatePreview();
+        }
+
+        function selectWeather(element) {
+            let cards = document.querySelectorAll('.weather-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        function saveRecord() {
+            let toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 1500);
+            resetTime();
+        }
+
+        // --- Stats View Logic ---
+        function syncData() {
+            let btn = document.getElementById('syncBtn');
+            let dot = document.getElementById('statusDot');
+            let text = document.getElementById('statusText');
+
+            btn.classList.add('syncing');
+            btn.innerHTML = '⏳ SYNCING...';
+            text.innerText = "Connecting to Network...";
+            dot.className = "status-dot status-pending";
+
+            setTimeout(() => {
+                btn.classList.remove('syncing');
+                btn.innerHTML = '✅ SYNC COMPLETE';
+                text.innerText = "All Records Synced To Hub";
+                dot.className = "status-dot status-synced";
+
+                setTimeout(() => {
+                    btn.innerHTML = '🔄 SYNC TO LOCAL HUB';
+                }, 3000);
+            }, 2500);
+        }
+
+        // Initialize
+        updatePreview();
+    </script>
+
+    <div
+        style="position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;">
+        <a href="https://github.com/bect/fieldweather" target="_blank"
+            style="background: rgba(0,0,0,0.6); color: white; padding: 8px 12px; border-radius: 4px; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.2); font-family: sans-serif;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+                </path>
+            </svg>
+            GitHub Repo
+        </a>
+        <a href="https://github.com/bect/fieldweather/releases/latest" target="_blank"
+            style="background: rgba(0,0,0,0.6); color: white; padding: 8px 12px; border-radius: 4px; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.2); font-family: sans-serif;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download App
+        </a>
+    </div>
+</body>
+
+</html>
