@@ -1,4 +1,4 @@
-package com.fieldweather.recorder
+package io.github.bect.fieldweather
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -18,9 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.fieldweather.recorder.data.SavedLocation
-import com.fieldweather.recorder.ui.theme.*
-import com.fieldweather.recorder.viewmodel.WeatherViewModel
+import io.github.bect.fieldweather.data.SavedLocation
+import io.github.bect.fieldweather.ui.theme.*
+import io.github.bect.fieldweather.viewmodel.WeatherViewModel
 import kotlinx.coroutines.launch
 
 @Composable

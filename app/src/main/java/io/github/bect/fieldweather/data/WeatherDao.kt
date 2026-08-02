@@ -1,4 +1,4 @@
-package com.fieldweather.recorder.data
+package io.github.bect.fieldweather.data
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -25,6 +25,9 @@ interface WeatherDao {
     
     @Query("SELECT locationName, latitude, longitude FROM weather_records WHERE locationName != '' GROUP BY locationName ORDER BY locationName ASC")
     fun getKnownLocations(): Flow<List<SavedLocation>>
+
+    @Query("UPDATE weather_records SET isSynced = 0")
+    suspend fun resetSyncStatus()
 
     @Query("DELETE FROM weather_records")
     suspend fun clearAllRecords()

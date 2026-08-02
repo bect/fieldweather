@@ -1,0 +1,75 @@
+name: Build App and Hub
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Set Versions from Tag
+      run: |
+        # Extract version without the 'v' (e.g. 0.1.0)
+        if [[ $GITHUB_REF == refs/tags/v* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+        else
+          VERSION="0.1.0"
+        fi
+        echo "Extracted Version: $VERSION"
+        
+        # Update Android build.gradle.kts
+        sed -i "s/versionName\s*=\s*\".*\"/versionName = \"$VERSION\"/" app/build.gradle.kts
+        sed -i "s/versionCode\s*=\s*[0-9]*/versionCode = ${{ github.run_number }}/" app/build.gradle.kts
+        
+        # Update C Hub Makefile
+        sed -i "s/^VERSION\s*=.*/VERSION = $VERSION/" weather-recorder-hub-c/Makefile
+
+    - name: Build Android App (Release)
+      run: |
+        chmod +x ./gradlew
+        ./gradlew assembleRelease
+
+    - name: Build C Hub
+      run: |
+        cd weather-recorder-hub-c
+        make
+
+    - name: Package Artifacts
+      run: |
+        mkdir release-package
+        # Copy the Android APK
+        cp app/build/outputs/apk/release/app-release-unsigned.apk release-package/fieldweather-app.apk
+        # Copy the C Hub executable
+        cp weather-recorder-hub-c/hub release-package/fieldweather-hub
+        # Copy the .env template if it exists, or create a placeholder for the hub
+        if [ -f "weather-recorder-hub-c/.env" ]; then
+          cp weather-recorder-hub-c/.env release-package/.env
+        else
+          echo "TURSO_DB_URL=" > release-package/.env
+          echo "TURSO_TOKEN=" >> release-package/.env
+        fi
+        
+        # Zip them together
+        cd release-package
+        zip -r ../fieldweather-release.zip *
+
+    - name: Upload Release Package
+      uses: actions/upload-artifact@v4
+      with:
+        name: fieldweather-release
+        path: fieldweather-release.zip
+        retention-days: 7

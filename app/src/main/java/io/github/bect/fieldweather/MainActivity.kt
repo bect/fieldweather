@@ -1,4 +1,4 @@
-package com.fieldweather.recorder
+package io.github.bect.fieldweather
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fieldweather.recorder.ui.theme.*
-import com.fieldweather.recorder.viewmodel.WeatherViewModel
+import io.github.bect.fieldweather.ui.theme.*
+import io.github.bect.fieldweather.viewmodel.WeatherViewModel
 
 import android.Manifest
 import android.content.Intent

@@ -6,6 +6,7 @@
 
 # Local configuration file (sdk path, etc)
 local.properties
+tdb
 
 # Gradle files
 .gradle/
@@ -57,3 +58,4 @@ weather-recorder-hub-c/*.db-journal
 weather-recorder-hub-c/*.sqlite
 weather-recorder-hub-c/*.sqlite3
 weather-recorder-hub-c/weather.db
+weather-recorder-hub-c/.env

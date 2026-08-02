@@ -1,4 +1,4 @@
-package com.fieldweather.recorder.data
+package io.github.bect.fieldweather.data
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -11,6 +11,15 @@ class SettingsRepository(context: Context) {
 
     private val _serverUrl = MutableStateFlow(prefs.getString("pref_server_url", "http://10.0.2.2:8888") ?: "http://10.0.2.2:8888")
     val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
+
+    private val _syncProvider = MutableStateFlow(prefs.getString("pref_sync_provider", "Local Hub") ?: "Local Hub")
+    val syncProvider: StateFlow<String> = _syncProvider.asStateFlow()
+
+    private val _tursoDbUrl = MutableStateFlow(prefs.getString("pref_turso_db_url", "") ?: "")
+    val tursoDbUrl: StateFlow<String> = _tursoDbUrl.asStateFlow()
+
+    private val _tursoToken = MutableStateFlow(prefs.getString("pref_turso_token", "") ?: "")
+    val tursoToken: StateFlow<String> = _tursoToken.asStateFlow()
 
     private val _timezone = MutableStateFlow(prefs.getString("pref_timezone", "Device Default") ?: "Device Default")
     val timezone: StateFlow<String> = _timezone.asStateFlow()
@@ -30,6 +39,21 @@ class SettingsRepository(context: Context) {
     fun setServerUrl(url: String) {
         prefs.edit().putString("pref_server_url", url).apply()
         _serverUrl.value = url
+    }
+
+    fun setSyncProvider(provider: String) {
+        prefs.edit().putString("pref_sync_provider", provider).apply()
+        _syncProvider.value = provider
+    }
+
+    fun setTursoDbUrl(url: String) {
+        prefs.edit().putString("pref_turso_db_url", url).apply()
+        _tursoDbUrl.value = url
+    }
+
+    fun setTursoToken(token: String) {
+        prefs.edit().putString("pref_turso_token", token).apply()
+        _tursoToken.value = token
     }
 
     fun setTimezone(tz: String) {
@@ -96,6 +120,27 @@ class SettingsRepository(context: Context) {
         prefs.edit()
             .remove("cache_timezone")
             .remove("cache_daily_colors")
+            .apply()
+    }
+
+    fun getForecastCache(locationName: String): io.github.bect.fieldweather.viewmodel.ForecastResult? {
+        val cachedLoc = prefs.getString("cache_forecast_loc", "")
+        if (cachedLoc != locationName) return null
+        
+        val condition = prefs.getString("cache_forecast_cond", null) ?: return null
+        val prob = prefs.getFloat("cache_forecast_prob", -1f)
+        val model = prefs.getString("cache_forecast_model", null) ?: return null
+        if (prob < 0f) return null
+        
+        return io.github.bect.fieldweather.viewmodel.ForecastResult(condition, prob.toDouble(), model)
+    }
+
+    fun saveForecastCache(locationName: String, result: io.github.bect.fieldweather.viewmodel.ForecastResult) {
+        prefs.edit()
+            .putString("cache_forecast_loc", locationName)
+            .putString("cache_forecast_cond", result.condition)
+            .putFloat("cache_forecast_prob", result.probability.toFloat())
+            .putString("cache_forecast_model", result.modelUsed)
             .apply()
     }
 }

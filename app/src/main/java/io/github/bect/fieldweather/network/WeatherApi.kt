@@ -1,8 +1,8 @@
-package com.fieldweather.recorder.network
+package io.github.bect.fieldweather.network
 
 import androidx.annotation.Keep
 
-import com.fieldweather.recorder.data.WeatherRecord
+import io.github.bect.fieldweather.data.WeatherRecord
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST

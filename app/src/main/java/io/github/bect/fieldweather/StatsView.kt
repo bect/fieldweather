@@ -1,4 +1,4 @@
-package com.fieldweather.recorder
+package io.github.bect.fieldweather
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -19,11 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fieldweather.recorder.data.WeatherRecord
-import com.fieldweather.recorder.ui.theme.*
-import com.fieldweather.recorder.viewmodel.DayColor
-import com.fieldweather.recorder.viewmodel.SyncState
-import com.fieldweather.recorder.viewmodel.WeatherViewModel
+import io.github.bect.fieldweather.data.WeatherRecord
+import io.github.bect.fieldweather.ui.theme.*
+import io.github.bect.fieldweather.viewmodel.DayColor
+import io.github.bect.fieldweather.viewmodel.SyncState
+import io.github.bect.fieldweather.viewmodel.WeatherViewModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter

@@ -1,4 +1,4 @@
-package com.fieldweather.recorder.location
+package io.github.bect.fieldweather.location
 
 import android.annotation.SuppressLint
 import android.content.Context

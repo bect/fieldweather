@@ -1,4 +1,4 @@
-package com.fieldweather.recorder.ui.theme
+package io.github.bect.fieldweather.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme

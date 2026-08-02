@@ -7,4 +7,4 @@
 -keep class com.google.gson.** { *; }
 
 # Keep network models and interfaces
--keep class com.fieldweather.recorder.network.** { *; }
+-keep class io.github.bect.fieldweather.network.** { *; }

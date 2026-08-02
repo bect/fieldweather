@@ -1,4 +1,4 @@
-package com.fieldweather.recorder.ui.theme
+package io.github.bect.fieldweather.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,5 +1,6 @@
+VERSION = 1.0.0
 CC ?= gcc
-CFLAGS = -O3 -Wall -Wextra -pthread -Ilib/sqlite -Ilib/cjson -Ilib/mongoose
+CFLAGS = -O3 -Wall -Wextra -pthread -Ilib/sqlite -Ilib/cjson -Ilib/mongoose -DMG_TLS=MG_TLS_BUILTIN
 LDFLAGS = -lm -ldl
 
 SRCS = src/main.c lib/mongoose/mongoose.c lib/cjson/cJSON.c lib/sqlite/sqlite3.c

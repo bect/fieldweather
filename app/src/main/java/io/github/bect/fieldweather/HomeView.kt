@@ -1,4 +1,4 @@
-package com.fieldweather.recorder
+package io.github.bect.fieldweather
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -24,8 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.fieldweather.recorder.ui.theme.*
-import com.fieldweather.recorder.viewmodel.WeatherViewModel
+import io.github.bect.fieldweather.ui.theme.*
+import io.github.bect.fieldweather.viewmodel.WeatherViewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -35,18 +35,52 @@ import kotlin.math.max
 @Composable
 fun HomeView(viewModel: WeatherViewModel) {
     val timeUntilNextLog by viewModel.timeUntilNextLog.collectAsState()
+    val forecast by viewModel.forecastResult.collectAsState()
     
-    if (timeUntilNextLog != null && timeUntilNextLog!! > 0) {
-        CountdownView(timeUntilNextLog!!)
-    } else {
-        LogWeatherForm(viewModel)
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (forecast != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                    .border(2.dp, FieldBlack)
+                    .background(FieldBlack)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("FORECAST:", color = FieldWhite, fontWeight = FontWeight.Bold, fontSize = 10.sp, letterSpacing = 1.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(forecast!!.condition.uppercase(), color = FieldYellow, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("${forecast!!.probability.toInt()}%", color = Color.LightGray, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
+                Text(
+                    when (forecast!!.modelUsed) {
+                        "2nd-Order Markov Chain" -> "2ND ORD"
+                        "1st-Order Markov Chain" -> "1ST ORD"
+                        else -> "0TH ORD"
+                    },
+                    color = Color(0xFF888888), fontSize = 9.sp, fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Box(modifier = Modifier.weight(1f)) {
+            if (timeUntilNextLog != null && timeUntilNextLog!! > 0) {
+                CountdownView(timeUntilNextLog!!)
+            } else {
+                LogWeatherForm(viewModel)
+            }
+        }
     }
 }
 
 @Composable
 fun CountdownView(timeMillis: Long) {
-    val hours = timeMillis / (1000 * 60 * 60)
-    val minutes = (timeMillis % (1000 * 60 * 60)) / (1000 * 60)
+    val minutes = timeMillis / (1000 * 60)
+    val seconds = (timeMillis % (1000 * 60)) / 1000
     
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp),
@@ -55,9 +89,9 @@ fun CountdownView(timeMillis: Long) {
     ) {
         Text("NEXT LOG AVAILABLE IN", color = FieldGrey, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
-        Text("${hours}h ${minutes}m", fontSize = 48.sp, color = FieldYellow, fontWeight = FontWeight.ExtraBold)
+        Text("${minutes}m ${seconds}s", fontSize = 48.sp, color = FieldYellow, fontWeight = FontWeight.ExtraBold)
         Spacer(modifier = Modifier.height(16.dp))
-        Text("You must wait 2 hours between weather logs.", color = FieldWhite, textAlign = TextAlign.Center)
+        Text("You must wait 15 minutes between weather logs.", color = FieldWhite, textAlign = TextAlign.Center)
     }
 }
 
@@ -81,10 +115,9 @@ fun LogWeatherForm(viewModel: WeatherViewModel) {
         "Foggy" to "🌫️"
     )
 
-
     Column(modifier = Modifier.fillMaxSize()) {
         // Top Section - Time Observed
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
             Text("TIME OBSERVED", color = FieldBlack, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp, fontSize = 12.sp, modifier = Modifier.background(FieldWhite).padding(horizontal = 8.dp, vertical = 4.dp))
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {

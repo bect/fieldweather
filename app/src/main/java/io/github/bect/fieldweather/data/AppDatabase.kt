@@ -1,4 +1,4 @@
-package com.fieldweather.recorder.data
+package io.github.bect.fieldweather.data
 
 import android.content.Context
 import androidx.room.Database

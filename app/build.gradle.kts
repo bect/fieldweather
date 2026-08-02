@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.fieldweather.recorder"
+    namespace = "io.github.bect.fieldweather"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.fieldweather.recorder"
+        applicationId = "io.github.bect.fieldweather"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

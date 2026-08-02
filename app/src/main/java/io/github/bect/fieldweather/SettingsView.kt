@@ -1,4 +1,4 @@
-package com.fieldweather.recorder
+package io.github.bect.fieldweather
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -12,13 +12,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fieldweather.recorder.ui.theme.*
-import com.fieldweather.recorder.viewmodel.WeatherViewModel
+import io.github.bect.fieldweather.ui.theme.*
+import io.github.bect.fieldweather.viewmodel.WeatherViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsView(viewModel: WeatherViewModel) {
     val serverUrl by viewModel.settings.serverUrl.collectAsState()
+    val syncProvider by viewModel.settings.syncProvider.collectAsState()
+    val tursoDbUrl by viewModel.settings.tursoDbUrl.collectAsState()
+    val tursoToken by viewModel.settings.tursoToken.collectAsState()
     val timezone by viewModel.settings.timezone.collectAsState()
     val use24HourFormat by viewModel.settings.use24HourFormat.collectAsState()
 
@@ -28,22 +31,95 @@ fun SettingsView(viewModel: WeatherViewModel) {
         Text("APP SETTINGS", color = FieldWhite, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Server URL
-        OutlinedTextField(
-            value = serverUrl,
-            onValueChange = { viewModel.settings.setServerUrl(it) },
-            label = { Text("Server IP / Hub URL", color = FieldYellow) },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = FieldYellow,
-                unfocusedBorderColor = FieldWhite,
-                focusedTextColor = FieldWhite,
-                unfocusedTextColor = FieldWhite
-            ),
-            singleLine = true
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Example: 192.168.1.10:8888", color = FieldGrey, fontSize = 12.sp)
+        // Sync Provider Dropdown
+        var providerExpanded by remember { mutableStateOf(false) }
+        val providers = listOf("Local Hub", "Turso Cloud")
+        
+        ExposedDropdownMenuBox(
+            expanded = providerExpanded,
+            onExpandedChange = { providerExpanded = !providerExpanded }
+        ) {
+            OutlinedTextField(
+                value = syncProvider,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Sync Provider", color = FieldYellow) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = providerExpanded) },
+                modifier = Modifier.fillMaxWidth().menuAnchor(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = FieldYellow,
+                    unfocusedBorderColor = FieldWhite,
+                    focusedTextColor = FieldWhite,
+                    unfocusedTextColor = FieldWhite
+                )
+            )
+            ExposedDropdownMenu(
+                expanded = providerExpanded,
+                onDismissRequest = { providerExpanded = false }
+            ) {
+                providers.forEach { p ->
+                    DropdownMenuItem(
+                        text = { Text(p) },
+                        onClick = {
+                            if (p != syncProvider) {
+                                viewModel.settings.setSyncProvider(p)
+                                viewModel.resetSyncStatus()
+                            }
+                            providerExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (syncProvider == "Local Hub") {
+            // Server URL
+            OutlinedTextField(
+                value = serverUrl,
+                onValueChange = { viewModel.settings.setServerUrl(it) },
+                label = { Text("Server IP / Hub URL", color = FieldYellow) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = FieldYellow,
+                    unfocusedBorderColor = FieldWhite,
+                    focusedTextColor = FieldWhite,
+                    unfocusedTextColor = FieldWhite
+                ),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Example: 192.168.1.10:8888", color = FieldGrey, fontSize = 12.sp)
+        } else {
+            // Turso Config
+            OutlinedTextField(
+                value = tursoDbUrl,
+                onValueChange = { viewModel.settings.setTursoDbUrl(it) },
+                label = { Text("Turso DB URL", color = FieldYellow) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = FieldYellow,
+                    unfocusedBorderColor = FieldWhite,
+                    focusedTextColor = FieldWhite,
+                    unfocusedTextColor = FieldWhite
+                ),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = tursoToken,
+                onValueChange = { viewModel.settings.setTursoToken(it) },
+                label = { Text("Turso Auth Token", color = FieldYellow) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = FieldYellow,
+                    unfocusedBorderColor = FieldWhite,
+                    focusedTextColor = FieldWhite,
+                    unfocusedTextColor = FieldWhite
+                ),
+                singleLine = true
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
