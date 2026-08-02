@@ -29,7 +29,7 @@ The Android client is built using Gradle. To build the release APK:
 chmod +x ./gradlew
 ./gradlew assembleRelease
 ```
-The compiled APK will be output to: `app/build/outputs/apk/release/app-release-unsigned.apk`
+The compiled APK will be output to: `app/build/outputs/apk/release/app-release.apk`
 
 ### 2. Compile Local Hub Server
 

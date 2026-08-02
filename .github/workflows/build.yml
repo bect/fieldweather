@@ -52,7 +52,7 @@ jobs:
       run: |
         mkdir release-package
         # Copy the Android APK
-        cp app/build/outputs/apk/release/app-release-unsigned.apk release-package/fieldweather-app.apk
+        cp app/build/outputs/apk/release/*.apk release-package/fieldweather-app.apk
         # Copy the C Hub executable
         cp weather-recorder-hub-c/hub release-package/fieldweather-hub
         # Copy the .env template if it exists, or create a placeholder for the hub
